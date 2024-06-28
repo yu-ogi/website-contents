@@ -1,0 +1,6 @@
+node_modules/
+contents/
+
+LICENSE
+package.json
+package-lock.json

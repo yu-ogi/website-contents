@@ -1,0 +1,43 @@
+name: Release and Upload distributions
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    # PullRequest に release ラベルが付与されている場合のみ実行
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install project
+        run: |
+          npm ci
+          npm run generate
+          npm test
+      - name: Set date
+        id: variables
+        run: |
+          TODAY=$(date '+%Y-%m-%d')
+          echo "today=${TODAY}" >> $GITHUB_OUTPUT
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*.zip"
+          name: "Release (${{ steps.variables.outputs.today }})"
+          tag: ${{ steps.variables.outputs.today }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          removeArtifacts: true
+          replacesArtifacts: true
