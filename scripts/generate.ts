@@ -1,9 +1,13 @@
 import { mkdir } from "node:fs/promises";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { compress } from "./compress";
 import { listGameJsonDirs } from "./listGameJsonDirs";
 
-const rootDir = resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const rootDir = resolve(__dirname, "..");
 const contentsDir = join(rootDir, "contents");
 const distDir = join(rootDir, "dist");
 const ignore = ["**/__reftest/**"];
